@@ -1,29 +1,42 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import gsap from 'gsap'
-import * as dat from 'lil-gui'
 
 /**
- * Debug
+ * Texture
  */
-const gui = new dat.GUI({ width: 500 })
+const loadingManager = new THREE.LoadingManager()
 
-document.addEventListener("keydown", e => {
-    if (e.key === "h") {
-        if (gui._hidden) {
-            gui.show()
-        } else {
-            gui.hide()
-        }
-    }
-})
+// loadingManager.onStart = () => {
+//     console.log("starting")
+// }
+// loadingManager.onLoad = () => {
+//     console.log("loading")
+// }
+// loadingManager.onProgress = (a, b) => {
+//     console.log("progressing", b)
+// }
+// loadingManager.onError = () => {
+//     console.log("erroring ")
+// }
 
-const param = {
-    spin: () => {
-        gsap.to(mesh.rotation, {duration: 1, y: mesh.rotation.y + Math.PI * 6})
-    }
-}
+const textureLoader = new THREE.TextureLoader(loadingManager)
+const colorTexture = textureLoader.load("/textures/minecraft.png")
+// const alphaTexture = textureLoader.load("/textures/door/alpha.jpg")
+// const ambientOcclusionTexture = textureLoader.load("/textures/door/ambientOcclusion.jpg")
+// const heightTexture = textureLoader.load("/textures/door/height.jpg")
+// const normalTexture = textureLoader.load("/textures/door/normal.jpg")
+// const metalnessTexture = textureLoader.load("/textures/door/metalness.jpg")
+// const roughnessTexture = textureLoader.load("/textures/door/roughness.jpg")
+
+// colorTexture.repeat.x = 2
+// colorTexture.repeat.y = 3
+
+// colorTexture.wrapS = THREE.RepeatWrapping
+// colorTexture.wrapT = THREE.RepeatWrapping
+
+colorTexture.magFilter = THREE.NearestFilter
+colorTexture.generateMipmaps = false
 
 /**
  * Base
@@ -38,23 +51,9 @@ const scene = new THREE.Scene()
  * Object
  */
 const geometry = new THREE.BoxGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+const material = new THREE.MeshBasicMaterial({ map: colorTexture })
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
-
-// Debug
-const coordinates = gui.addFolder("coordinates")
-coordinates.add(mesh.position, 'x', -5, 5, 0.01)
-coordinates.add(mesh.position, 'y', -5, 5, 0.01)
-coordinates.add(mesh.position, 'z', -5, 5, 0.01)
-
-gui.add(mesh, 'visible').name("Visible")
-gui.add(material, 'wireframe').name("Wireframe")
-
-gui.addColor(material, 'color')
-
-const ani = gui.addFolder("Animations")
-ani.add(param, "spin")
 
 /**
  * Sizes
@@ -84,7 +83,9 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.z = 3
+camera.position.x = 1
+camera.position.y = 1
+camera.position.z = 1
 scene.add(camera)
 
 // Controls
