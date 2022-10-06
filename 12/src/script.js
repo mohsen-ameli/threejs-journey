@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as gui from "lil-gui"
 
-/**
+/***
  * Debug
  */
  const debug = new gui.GUI()
