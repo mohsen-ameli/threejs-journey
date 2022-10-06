@@ -32,7 +32,7 @@ const matcapTexture = textureLoader.load("/textures/matcaps/8.png")
     "/fonts/helvetiker_regular.typeface.json",
     font => {
         const textGeometry = new TextGeometry(
-            "Mohsen Ameli!",
+            "Mohsen Ameli",
             {
                 font,
                 size: .5,
