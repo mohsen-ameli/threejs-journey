@@ -16,6 +16,14 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
+ * Texture
+ */
+const textureLoader = new THREE.TextureLoader()
+const bakedShadow = textureLoader.load("/textures/bakedShadow.jpg")
+const simpleShadow = textureLoader.load("/textures/simpleShadow.jpg")
+
+
+/**
  * Lights
  */
 // Ambient light
@@ -32,6 +40,20 @@ gui.add(directionalLight.position, 'y').min(- 5).max(5).step(0.001)
 gui.add(directionalLight.position, 'z').min(- 5).max(5).step(0.001)
 scene.add(directionalLight)
 
+directionalLight.castShadow = true
+directionalLight.shadow.mapSize.width = 1024
+directionalLight.shadow.mapSize.height = 1024
+directionalLight.shadow.camera.top = 2
+directionalLight.shadow.camera.right = 2
+directionalLight.shadow.camera.bottom = -1
+directionalLight.shadow.camera.left = -2
+directionalLight.shadow.camera.near = 1
+directionalLight.shadow.camera.far = 10
+
+// Helper
+// const helper = new THREE.CameraHelper(directionalLight.shadow.camera)
+// scene.add(helper)
+
 /**
  * Materials
  */
@@ -47,15 +69,29 @@ const sphere = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 32, 32),
     material
 )
+sphere.castShadow = true
 
 const plane = new THREE.Mesh(
     new THREE.PlaneGeometry(5, 5),
     material
 )
+plane.receiveShadow = true
 plane.rotation.x = - Math.PI * 0.5
 plane.position.y = - 0.5
 
 scene.add(sphere, plane)
+
+const shadowPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(2, 2),
+    new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        alphaMap: simpleShadow,
+        transparent: true
+    })
+)
+shadowPlane.rotation.x = -Math.PI / 2
+shadowPlane.position.y = plane.position.y + 0.001
+scene.add(shadowPlane)
 
 /**
  * Sizes
@@ -103,14 +139,29 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
+renderer.shadowMap.enabled = false
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
 /**
  * Animate
  */
 const clock = new THREE.Clock()
 
+gui.add(shadowPlane.material, "opacity", 0, 2, 0.001)
+
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+
+    // Animating Sphere
+    sphere.position.x = Math.cos(elapsedTime)* 1.5
+    sphere.position.z = Math.sin(elapsedTime)* 1.5
+    sphere.position.y = Math.abs(Math.sin(elapsedTime * 3))
+
+    // Upading the shadow
+    shadowPlane.position.x = sphere.position.x
+    shadowPlane.position.z = sphere.position.z
+    shadowPlane.material.opacity = (1 - sphere.position.y) * 0.6
 
     // Update controls
     controls.update()
