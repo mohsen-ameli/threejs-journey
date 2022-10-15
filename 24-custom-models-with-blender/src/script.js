@@ -28,21 +28,19 @@ gltfLoader.setDRACOLoader(dracoLoader)
 
 let mixer = null
 
-gltfLoader.load("/models/Fox/glTF/Fox.gltf", gltf => {
-    mixer = new THREE.AnimationMixer(gltf.scene)
-    const action = mixer.clipAction(gltf.animations[2])
-    action.play()
-
-    const size = 0.025
-    gltf.scene.scale.set(size, size, size)
-    scene.add(gltf.scene)
-})
+gltfLoader.load(
+    '/models/hamburger.glb',
+    (gltf) =>
+    {
+        scene.add(gltf.scene)
+    }
+)
 
 /**
  * Floor
  */
 const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10),
+    new THREE.PlaneGeometry(50, 50),
     new THREE.MeshStandardMaterial({
         color: '#444444',
         metalness: 0,
@@ -98,12 +96,12 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(2, 2, 2)
+camera.position.set(- 8, 4, 8)
 scene.add(camera)
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
-controls.target.set(0, 0.75, 0)
+controls.target.set(0, 1, 0)
 controls.enableDamping = true
 
 /**
@@ -129,8 +127,10 @@ const tick = () =>
     const deltaTime = elapsedTime - previousTime
     previousTime = elapsedTime
 
-    // Mixer update
-    mixer && mixer.update(deltaTime)
+    if(mixer)
+    {
+        mixer.update(deltaTime)
+    }
 
     // Update controls
     controls.update()
