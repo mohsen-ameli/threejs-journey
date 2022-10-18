@@ -18,6 +18,20 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
+ * Update all materials
+ */
+ const updateAllMaterials = () => {
+    scene.traverse(child => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+            child.material.needsUpdate = true
+            child.receiveShadow = true
+            child.castShadow = true
+        }
+    })
+}
+
+
+/**
  * Models
  */
 const dracoLoader = new DRACOLoader()
@@ -30,12 +44,15 @@ let mixer = null
 
 gltfLoader.load("/models/Fox/glTF/Fox.gltf", gltf => {
     mixer = new THREE.AnimationMixer(gltf.scene)
-    const action = mixer.clipAction(gltf.animations[2])
+    const action = mixer.clipAction(gltf.animations[0])
     action.play()
 
     const size = 0.025
     gltf.scene.scale.set(size, size, size)
+    gltf.scene.castShadow = true
     scene.add(gltf.scene)
+
+    updateAllMaterials()
 })
 
 /**
@@ -59,7 +76,7 @@ scene.add(floor)
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
 scene.add(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
 directionalLight.castShadow = true
 directionalLight.shadow.mapSize.set(1024, 1024)
 directionalLight.shadow.camera.far = 15
@@ -116,6 +133,10 @@ renderer.shadowMap.enabled = true
 renderer.shadowMap.type = THREE.PCFSoftShadowMap
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.physicallyCorrectLights = true
+renderer.outputEncoding = THREE.sRGBEncoding
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 3
 
 /**
  * Animate
